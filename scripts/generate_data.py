@@ -1,5 +1,5 @@
 '''
-	Script that generates ranges and cfvs.
+    Script that generates ranges and cfvs.
 '''
 import sys
 import os
@@ -14,12 +14,12 @@ from arguments_parser import parse_arguments
 
 
 def main():
-	args = sys.argv[1:]
-	street, starting_idx, approximate = parse_arguments(args)
-	street_name = card_to_string.street_to_name(street)
-	dirpath = os.path.join( arguments.data_path, street_name, '{}_{}'.format(approximate, 'npy') )
-	data_generation = DataGeneration(dirpath)
-	data_generation.generate_data(street, approximate, starting_idx)
+    args = sys.argv[1:]
+    street, starting_idx, approximate = parse_arguments(args)
+    street_name = card_to_string.street_to_name(street)
+    dirpath = os.path.join( arguments.data_path, street_name, '{}_{}'.format(approximate, 'npy') )
+    data_generation = DataGeneration(dirpath)
+    data_generation.generate_data(street, approximate, starting_idx)
 
 
 

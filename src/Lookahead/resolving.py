@@ -9,7 +9,7 @@ from Lookahead.lookahead import Lookahead
 from Lookahead.cfrd_gadget import CFRDGadget
 from Tree.tree_builder import PokerTreeBuilder
 from Settings.arguments import arguments
-from Settings.constants import constants
+from Settings import constants
 from Game.card_tools import card_tools
 from helper_classes import TreeParams
 from Tree.tree_values import TreeValues

@@ -4,7 +4,7 @@
 import numpy as np
 
 from Settings.arguments import arguments
-from Settings.constants import constants
+from Settings import constants
 from Game.card_to_string_conversion import card_to_string
 from NeuralNetwork.next_round_value import NextRoundValue, get_next_round_value
 from helper_classes import LookaheadLayer

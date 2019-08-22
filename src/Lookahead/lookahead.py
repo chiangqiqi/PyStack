@@ -17,7 +17,7 @@ from Lookahead.lookahead_builder import LookaheadBuilder
 from TerminalEquity.terminal_equity import TerminalEquity
 from Lookahead.cfrd_gadget import CFRDGadget
 from Settings.arguments import arguments
-from Settings.constants import constants
+from Settings import constants
 from helper_classes import LookaheadResults
 
 class Lookahead():

@@ -6,9 +6,11 @@ import numpy as np
 
 from TerminalEquity.evaluator import evaluator
 from Settings.arguments import arguments
-from Settings.constants import constants
-from Game.card_tools import card_tools
+from Settings import constants
+from Game.card_tools import card_tools,hand_card_iter
 from Game.card_combinations import card_combinations
+
+HC, CC = constants.hand_count, constants.card_count
 
 class TerminalEquity():
     def __init__(self):
@@ -17,6 +19,7 @@ class TerminalEquity():
         self.cache[1] = np.load('src/TerminalEquity/matrices/pf_equity.npy')
         # load card blocking matrix from disk if exists
         if os.path.exists('src/TerminalEquity/matrices/block_matrix.npy'):
+            # block matrix is of size HCXHC
             self._block_matrix = np.load('src/TerminalEquity/matrices/block_matrix.npy')
         else:
             self._block_matrix = self._create_block_matrix()
@@ -75,28 +78,24 @@ class TerminalEquity():
             (used in GUI app to evaluate stronger hand)
         @return [I] :strength for all hand combinations
         '''
-        HC = constants.hand_count
         return np.sum(self.equity_matrix, axis=0)
-
 
     def _create_block_matrix(self):
         ''' Creates boolean mask matrix for hands, that cannot be available
             if particular cards where used. (ex: if hand1 is 'KsQs', then all
             hand combinations with 'Ks' or 'Qs' should not be available)
+        也是一个简单的互斥问题，就是横行和纵行不应该有一样的手牌
         @return [I,I] :boolean mask for possible hands
         '''
-        HC, CC = constants.hand_count, constants.card_count
         out = np.ones([HC,HC], dtype=bool)
-        for p1_card1 in range(CC):
-            for p1_card2 in range(p1_card1+1, CC):
+        for p1_card1,p1_card2 in hand_card_iter():
+            for p2_card1,p2_card2 in hand_card_iter():
                 p1_idx = card_tools.get_hand_index([p1_card1, p1_card2])
-                for p2_card1 in range(CC):
-                    for p2_card2 in range(p2_card1+1, CC):
-                        p2_idx = card_tools.get_hand_index([p2_card1, p2_card2])
-                        if p1_card1 == p2_card1 or p1_card1 == p2_card2 or \
-                           p1_card2 == p2_card1 or p1_card2 == p2_card2:
-                           out[p1_idx, p2_idx] = 0
-                           out[p2_idx, p1_idx] = 0
+                p2_idx = card_tools.get_hand_index([p2_card1, p2_card2])
+                if p1_card1 == p2_card1 or p1_card1 == p2_card2 or \
+                   p1_card2 == p2_card1 or p1_card2 == p2_card2:
+                    out[p1_idx, p2_idx] = 0
+                    out[p2_idx, p1_idx] = 0
         return out
 
 
@@ -164,9 +163,3 @@ class TerminalEquity():
         matrix[:,:] *= possible_hand_indexes.reshape([1,HC])
         matrix[:,:] *= possible_hand_indexes.reshape([HC,1])
         matrix[:,:] *= self._block_matrix
-
-
-
-
-
-#

@@ -3,14 +3,15 @@
 '''
 import numpy as np
 
-from Settings.constants import constants
+from Settings import constants
 from Settings.arguments import arguments
 from Game.card_to_string_conversion import card_to_string
-from Game.card_tools import card_tools
+from Game.card_tools import card_tools,hand_card_iter
+
+_texas_lookup = np.load('src/TerminalEquity/matrices/texas_lookup.npy')
 
 class Evaluator():
     def __init__(self):
-        self._texas_lookup = np.load('src/TerminalEquity/matrices/texas_lookup.npy')
         self._idx_to_cards = self._create_index_to_cards_matrix()
 
 
@@ -20,11 +21,10 @@ class Evaluator():
         '''
         HC, HCC, CC = constants.hand_count, constants.hand_card_count, constants.card_count
         out = np.zeros([HC,HCC], dtype=arguments.dtype)
-        for card1 in range(CC):
-            for card2 in range(card1+1,CC):
-                idx = card_tools.get_hand_index([card1,card2])
-                out[ idx , 0 ] = card1
-                out[ idx , 1 ] = card2
+        for card1,card2 in hand_card_iter():
+            idx = card_tools.get_hand_index([card1,card2])
+            out[ idx , 0 ] = card1
+            out[ idx , 1 ] = card2
         return out
 
 
@@ -36,9 +36,10 @@ class Evaluator():
         @return [b]     :batches of evaluated hands strengths
         (2-7 depends on how many cards are on board (0-5))
         '''
-        rank = self._texas_lookup[ hands[ : , 0 ] + 54 ]
+        rank = _texas_lookup[ hands[ : , 0 ] + 54 ]
+        # 这个 loop 的是一张牌, 所以这里面搞得数据结构好像是个trie tree?
         for c in range(1, hands.shape[1]):
-            rank = self._texas_lookup[ hands[ : , c ] + rank + 1 ]
+            rank = _texas_lookup[ hands[ : , c ] + rank + 1 ]
         rank *= mask
         rank *= -1
         return rank
@@ -51,6 +52,7 @@ class Evaluator():
         '''
         HC, CC = constants.hand_count, constants.card_count
         SC, HCC = constants.suit_count, constants.hand_card_count
+        # 这段是需要做 batch
         if board.ndim == 2:
             boards = board
             batch_size = boards.shape[0]
@@ -64,6 +66,7 @@ class Evaluator():
             mask = mask.reshape([-1])
             return self.evaluate(hands, mask).reshape([batch_size, HC])
         elif board.ndim == 1:
+            # HC 是所有口袋牌的数量，对应把公牌 append 到上面
             hands = np.zeros([HC, board.shape[0] + HCC], dtype=arguments.int_dtype)
             hands[ : ,  :board.shape[0] ] = np.repeat(board.reshape([1,board.shape[0]]), HC, axis=0)
             hands[ : , -2: ] = self._idx_to_cards.copy()

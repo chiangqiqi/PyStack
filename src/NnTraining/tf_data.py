@@ -72,8 +72,3 @@ def create_iterator( filenames, train, x_shape, y_shape, batch_size, num_cores=o
     # Create an iterator for the dataset and the above modifications.
     iterator = dataset.make_one_shot_iterator()
     return iterator
-
-
-
-
-#

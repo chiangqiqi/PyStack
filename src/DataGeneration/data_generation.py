@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 
 from Settings.arguments import arguments
-from Settings.constants import constants
+from Settings import constants
 from Game.card_tools import card_tools
 from Game.card_combinations import card_combinations
 from Game.card_to_string_conversion import card_to_string
@@ -39,6 +39,7 @@ class DataGeneration():
         @param: [0-5] :vector of board cards, where card is unique index (int)
         @param: int   :batch of how many situations are evaluated simultaneously (usually will be = 1)
         '''
+
         HC, PC = constants.hand_count, constants.players_count
         # set board in terminal equity and range generator
         self.term_eq.set_board(board)

@@ -4,7 +4,7 @@
 import numpy as np
 
 from Settings.arguments import arguments
-from Settings.constants import constants
+from Settings import constants
 
 class CardToStringConversion():
     def __init__(self):
@@ -93,8 +93,5 @@ class CardToStringConversion():
             return 'turn'
         elif street == 4:
             return 'river'
-
-
-
 
 card_to_string = CardToStringConversion()

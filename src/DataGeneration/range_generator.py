@@ -1,12 +1,12 @@
 '''
-	Samples random probability vectors for use as player ranges
+Samples random probability vectors for use as player ranges
 '''
 import numpy as np
 
 from Settings.arguments import arguments
-from Settings.constants import constants
+from Settings import constants
 from TerminalEquity.evaluator import evaluator
-from Game.card_tools import card_tools
+from Game.card_tools import card_tools,get_possible_hands_mask
 
 class RangeGenerator():
     def __init__(self):
@@ -58,7 +58,7 @@ class RangeGenerator():
         HC = constants.hand_count
         hand_strengths = evaluator.evaluate_board(board) if board.shape[0] == 5 else hand_strengths
         # get possible hands mask for particular board
-        possible_hand_indexes = card_tools.get_possible_hands_mask(board).astype(bool)
+        possible_hand_indexes = get_possible_hands_mask(board).astype(bool)
         self.possible_hands_count = possible_hand_indexes.sum()
         self.possible_hands_mask = possible_hand_indexes.reshape([1,-1])
         # non_coliding_strengths shape: [self.possible_hands_count]
@@ -100,8 +100,3 @@ def np_gather(a, axis, index):
             shape = [-1 if i==j else 1 for j in range(a.ndim)]
             expanded_index.append( np.arange(a.shape[i]).reshape(shape) )
     return a[tuple(expanded_index)]
-
-
-
-
-#

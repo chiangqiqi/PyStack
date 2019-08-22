@@ -8,9 +8,11 @@
 import numpy as np
 
 from Settings.arguments import arguments
-from Settings.constants import constants
+from Settings import constants
 from Game.card_to_string_conversion import card_to_string
 from Game.card_combinations import card_combinations
+
+HC,CC = constants.hand_count, constants.card_count
 
 class CardTools():
     def __init__(self):
@@ -70,7 +72,7 @@ class CardTools():
                 for card2 in range(card1+1,CC):
                     if not used[card2]:
                         hand = [card1, card2]
-                        hand_index = self.get_hand_index(hand)
+                        hand_index = get_hand_index(hand)
                         out[ hand_index ] = 1
         return out
 
@@ -131,7 +133,7 @@ class CardTools():
         @return [B,I] :tensor, where B is all possible next round boards
         '''
         BCC, CC = constants.board_card_count, constants.card_count
-        street = self.board_to_street(board)
+        street = board_to_street(board)
         boards_count = card_combinations.count_next_street_boards(street)
         out = np.zeros([ boards_count, BCC[street] ], dtype=arguments.int_dtype)
         boards = [out,1] # (boards, index)
@@ -151,7 +153,7 @@ class CardTools():
         @return [B,I] :tensor, where B is all possible next round boards
         '''
         BCC, SC = constants.board_card_count, constants.streets_count
-        street = self.board_to_street(board)
+        street = board_to_street(board)
         boards_count = card_combinations.count_last_street_boards(street)
         out = np.zeros([ boards_count, BCC[SC-1] ], dtype=arguments.int_dtype)
         boards = [out,1] # (boards, index)
@@ -176,3 +178,89 @@ class CardTools():
         return index - 1
 
 card_tools = CardTools()
+
+def get_possible_hands_mask(board):
+    ''' Gives the private hands which are valid with a given board.
+    给定一组公牌之后，private cards 会有一些是 unvalid 的 (牌已经出现在公共牌中)，
+    给出一个mask
+    @param: [0-5] :vector of board cards, where card is unique index (int)
+    @return [I]   :vector with an entry for every possible hand (private card),
+            which is `1` if the hand shares no cards with the board and `0` otherwise
+    '''
+    HC, CC = constants.hand_count, constants.card_count
+    out = np.zeros([HC], dtype=arguments.int_dtype)
+    if board.ndim == 0 or board.shape[0] == 0:
+        out.fill(1)
+        return out
+    # 除去公共牌之外的牌
+    left_cards = [ i for i in range(CC) if i not in board ]
+
+    for card1 in left_cards:
+        for card2 in range(card1+1,CC):
+            hand_index = get_hand_index([card1, card2])
+            out[ hand_index ] = 1
+    return out
+
+def board_to_street(board):
+    ''' Gives the current betting round based on a board vector
+    @param: [0-5] :vector of board cards, where card is unique index (int)
+    @return int   :current betting round/street
+    '''
+    BCC, SC = constants.board_card_count, constants.streets_count
+    if board.ndim == 0 or board.shape[0] == 0:
+        return 1
+    else:
+        for i in range(SC):
+            if board.shape[0] == BCC[i]:
+                return i+1
+
+def get_hand_index(hand):
+    ''' Gives a numerical index for a set of hand
+    @param: [2] :vector of player private cards, where card is unique index (int)
+    @return int :numerical index for the hand (0-1326)
+    (first card is always smaller then second!)
+    '''
+    index = 1
+    for i in range(len(hand)):
+        index += card_combinations.choose(hand[i], i+1)
+    return index - 1
+
+
+def convert_board_to_nn_feature(self, board):
+    '''
+    @param: [0-5]     :vector of board cards, where card is unique index (int)
+    @return [52+4+13] :vector of shape [total cards in deck + suit count + rank count]
+    '''
+    num_ranks, num_suits, num_cards = constants.rank_count, constants.suit_count, constants.card_count
+    # init output
+    out = np.zeros([num_cards + num_suits + num_ranks], dtype=np.float32)
+    if board.ndim == 0 or board.shape[0] == 0: # no cards were placed
+        return out
+    assert((board >= 0).all()) # all cards are indexes 0 - 51
+    # init vars
+    one_hot_board = np.zeros([num_cards], dtype=np.float32)
+    suit_counts = np.zeros([num_suits], dtype=np.float32)
+    rank_counts = np.zeros([num_ranks], dtype=np.float32)
+    # encode cards, so that all ones show what card is placed
+    one_hot_board[ board ] = 1
+    # count number of different suits and ranks on board
+    for card in board:
+        suit = card_to_string.card_to_suit(card)
+        rank = card_to_string.card_to_rank(card)
+        suit_counts[ suit ] += 1
+        rank_counts[ rank ] += 1
+    # normalize counts
+    rank_counts /= num_ranks
+    suit_counts /= num_suits
+    # combine all arrays and return
+    out[ :num_cards ] = one_hot_board
+    out[ num_cards:num_cards+num_suits ] = suit_counts
+    out[ num_cards+num_suits: ] = rank_counts
+    return out
+
+def hand_card_iter():
+    """返回一个 player 的手牌的每种组合
+    """
+    for card1 in range(CC):
+        for card2 in range(card1+1, CC):
+            yield card1, card2

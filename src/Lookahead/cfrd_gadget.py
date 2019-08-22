@@ -6,7 +6,7 @@
 import numpy as np
 
 from Settings.arguments import arguments
-from Settings.constants import constants
+from Settings import constants
 from Game.card_tools import card_tools
 
 class CFRDGadget():

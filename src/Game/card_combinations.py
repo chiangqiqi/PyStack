@@ -1,6 +1,6 @@
 import numpy as np
 
-from Settings.constants import constants
+from Settings import constants
 
 
 class CardCombinations():

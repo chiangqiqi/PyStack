@@ -1,7 +1,7 @@
 '''
-    Uses the the CFR-D gadget to generate opponent ranges for re-solving.
-    See [Solving Imperfect Information Games Using Decomposition]
-    (http://poker.cs.ualberta.ca/publications/aaai2014-cfrd.pdf)
+Uses the the CFR-D gadget to generate opponent ranges for re-solving.
+See [Solving Imperfect Information Games Using Decomposition]
+(http://poker.cs.ualberta.ca/publications/aaai2014-cfrd.pdf)
 '''
 import numpy as np
 

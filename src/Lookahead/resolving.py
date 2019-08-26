@@ -7,7 +7,7 @@ import numpy as np
 
 from Lookahead.lookahead import Lookahead
 from Lookahead.cfrd_gadget import CFRDGadget
-from Tree.tree_builder import PokerTreeBuilder
+from Tree.tree_builder import build_tree
 from Settings.arguments import arguments
 from Settings import constants
 from Game.card_tools import card_tools
@@ -22,7 +22,6 @@ class Resolving():
         @param: TerminalEquity :object that evaluates rewards with specified board
         @param: int            :printing outputs if >0
         '''
-        self.tree_builder = PokerTreeBuilder()
         self.verbose = verbose
         self.terminal_equity = terminal_equity
 
@@ -33,8 +32,8 @@ class Resolving():
         '''
         build_tree_params = TreeParams()
         build_tree_params.root_node = node
-        build_tree_params.limit_to_street = True
-        self.lookahead_tree = self.tree_builder.build_tree(build_tree_params)
+        # build_tree
+        self.lookahead_tree = build_tree(build_tree_params, limit_to_street=True)
 
 
     def resolve(self, node, player_range, opponent_range=None, opponent_cfvs=None):
@@ -57,6 +56,7 @@ class Resolving():
         self._create_lookahead_tree(node)
         self.lookahead = Lookahead(self.lookahead_tree, self.terminal_equity, batch_size)
         if self.verbose > 0: t0 = time.time()
+        import pdb; pdb.set_trace()
         if opponent_range is not None:
             self.lookahead.resolve(player_range=player_range, opponent_range=opponent_range)
             self.resolve_results = self.lookahead.get_results(reconstruct_opponent_cfvs=False)

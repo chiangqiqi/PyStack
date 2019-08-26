@@ -127,7 +127,9 @@ class Lookahead():
 
 
     def _compute_current_strategies(self):
-        ''' Uses regret matching to generate the players' current strategies '''
+        ''' Uses regret matching to generate the players' current strategies
+        Regret matching
+        '''
         for d in range(1,self.depth):
             layer = self.layers[d]
             # [A{d-1}, B{d-2}, NTNAN{d-2}, b, I] = [A{d-1}, B{d-2}, NTNAN{d-2}, b, I]
@@ -139,6 +141,8 @@ class Lookahead():
             # note that the regrets as well as the CFVs have switched player indexing
             # [ 1, B{d-2}, NTNAN{d-2}, b, I] = [A{d-1}, B{d-2}, NTNAN{d-2}, b, I]
             regrets_sum = np.sum(positive_regrets, axis=0, keepdims=True)
+            # 有一些动作已经不合法，比如有一些牌已经发出来了，需要用 mask 做一个简单的遮罩
+            # 貌似是共计有 5 个action
             # broadcasting regrets_sum: [ 1, B{d-2}, NTNAN{d-2}, b, I] -> [A{d-1}, B{d-2}, NTNAN{d-2}, b, I]
             # [ A{d-1}, B{d-2}, NTNAN{d-2}, b, I] = [A{d-1}, B{d-2}, NTNAN{d-2}, b, I] / [A{d-1}, B{d-2}, NTNAN{d-2}, b, I]
             layer.current_strategy = positive_regrets / regrets_sum
@@ -151,6 +155,7 @@ class Lookahead():
         PC, HC, batch_size = constants.players_count, constants.hand_count, self.batch_size
         for d in range(0, self.depth-1):
             next_layer, layer, parent, grandparent = self.layers[d+1], self.layers[d], self.layers[d-1], self.layers[d-2]
+            # notice that some times we do not have parent or grandparent
             p_num_terminal_actions = parent.num_terminal_actions if d > 0 else 0
             p_num_bets = parent.num_bets if d > 0 else 1
             gp_num_nonallin_bets = grandparent.num_nonallin_bets if d > 1 else 1
@@ -158,15 +163,20 @@ class Lookahead():
             # copy the ranges of inner nodes and transpose (np.transpose - swaps axis: 1dim <-> 2 dim)
             # array slicing: [A{d-1}, B{d-2}, NTNAN{d-2}, b, P, I] -> [B{d-1}, NAB{d-2}, NTNAN{d-2}, b, P, I]
             # [B{d-1}, NTNAN{d-2}, NAB{d-2}, b, P, I] = [B{d-1}, NAB{d-2}, NTNAN{d-2}, b, P, I]
-            next_layer_ranges = np.transpose(layer.ranges[ p_num_terminal_actions: , :gp_num_nonallin_bets , : , : , : , : ], [0,2,1,3,4,5])
+            next_layer_ranges = np.transpose(
+                layer.ranges[ p_num_terminal_actions: , :gp_num_nonallin_bets , : , : , : , : ],
+                [0,2,1,3,4,5]
+            )
             # [ 1, B{d-1}, NTNAN{d-2} x NAB{d-2}, b, P, I] = [B{d-1}, NTNAN{d-2}, NAB{d-2}, b, P, I]
             # [ 1, B{d-1}, NTNAN{d-2} x NAB{d-2}, b, P, I] is the same as [ 1, B{d-1}, NTNAN{d-1}, b, P, I]
             next_layer_ranges = next_layer_ranges.reshape([1, p_num_bets, -1, batch_size, PC, HC])
             # repeat next_layer_ranges: [ 1, B{d-1}, NTNAN{d-1}, b, P, I] -> [A{d}, B{d-1}, NTNAN{d-1}, b, P, I]
             # [A{d}, B{d-1}, NTNAN{d-1}, b, P, I] = [A{d}, B{d-1}, NTNAN{d-1}, b, P, I]
+            # 把 range 复制5遍
             next_layer.ranges = np.repeat(next_layer_ranges, next_layer.ranges.shape[0], axis=0)
             # multiply the ranges of the acting player by his strategy
             # [ A{d}, B{d-1}, NTNAN{d-1}, b, P, I] *= [ A{d}, B{d-1}, NTNAN{d-1}, b, I]
+            import pdb; pdb.set_trace()
             next_layer.ranges[ : , : , : , : , layer.acting_player, : ] *= next_layer.current_strategy
 
 

@@ -39,6 +39,8 @@ class DataGeneration():
         @param: [0-5] :vector of board cards, where card is unique index (int)
         @param: int   :batch of how many situations are evaluated simultaneously (usually will be = 1)
         '''
+        print("board cards is {}".format(
+            card_to_string.cards_to_string(board)))
 
         HC, PC = constants.hand_count, constants.players_count
         # set board in terminal equity and range generator

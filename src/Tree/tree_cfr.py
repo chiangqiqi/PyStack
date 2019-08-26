@@ -1,9 +1,9 @@
 '''
-    Runs Counterfactual Regret Minimization (CFR) to approximately
-    solve a game represented by a complete game tree.
-    This class does full solving from the root of the game with no
-    limited lookahead, it is not used in continual re-solving.
-    It is provided simply for convenience.
+Runs Counterfactual Regret Minimization (CFR) to approximately
+solve a game represented by a complete game tree.
+This class does full solving from the root of the game with no
+limited lookahead, it is not used in continual re-solving.
+It is provided simply for convenience.
 '''
 import numpy as np
 
@@ -158,7 +158,3 @@ class TreeCFR():
         self.cfr_skip_iters = skip
         for self.iter in range(iter_count):
             self.cfrs_iter_dfs(root, self.iter)
-
-
-
-#

@@ -1,6 +1,6 @@
 '''
-    Computes the expected value of a strategy profile on a game's public tree,
-    as well as the value of a best response against the profile
+Computes the expected value of a strategy profile on a game's public tree,
+as well as the value of a best response against the profile
 '''
 import numpy as np
 
@@ -150,8 +150,3 @@ class TreeValues():
         # 3.0 compute the values
         self._fill_ranges_dfs(root, starting_ranges)
         self._compute_values_dfs(root)
-
-
-
-
-#

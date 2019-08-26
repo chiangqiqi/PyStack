@@ -1,5 +1,5 @@
 '''
-    Builds the internal data structures of a @{lookahead|Lookahead} object.
+Builds the internal data structures of a @{lookahead|Lookahead} object.
 '''
 import numpy as np
 
@@ -292,8 +292,3 @@ class LookaheadBuilder():
             assert(layer_num_actions >= 2)
             # go deeper
             self._compute_tree_structures(next_layer, current_depth + 1)
-
-
-
-
-#

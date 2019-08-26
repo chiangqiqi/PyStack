@@ -1,7 +1,7 @@
 '''
-    Performs the main steps of continual re-solving, tracking player range
-    and opponent counterfactual values so that re-solving can be done at each
-    new game state.
+Performs the main steps of continual re-solving, tracking player range
+and opponent counterfactual values so that re-solving can be done at each
+new game state.
 '''
 import numpy as np
 import time
@@ -10,7 +10,7 @@ from Game.card_to_string_conversion import card_to_string
 from TerminalEquity.terminal_equity import TerminalEquity
 from Lookahead.resolving import Resolving
 from Settings.arguments import arguments
-from Settings.constants import constants
+from Settings import constants
 from Game.card_tools import card_tools
 from helper_classes import Node
 from Player.cache import Cache

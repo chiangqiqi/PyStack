@@ -1,7 +1,7 @@
 '''
 	Builds the internal data structures of a @{lookahead|Lookahead} object.
 '''
-import numpy as np
+import cupy as np
 
 from Settings.arguments import arguments
 from Settings.constants import constants

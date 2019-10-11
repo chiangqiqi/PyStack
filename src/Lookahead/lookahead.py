@@ -11,7 +11,7 @@
 		* I - number of infosets (here it is number of possible hands 52*51/2=1326)
 '''
 import time
-import numpy as np
+import cupy as np
 from tqdm import tqdm
 
 from Lookahead.lookahead_builder import LookaheadBuilder
@@ -98,8 +98,11 @@ class Lookahead():
 		'''
 		P1, P2 = constants.players.P1, constants.players.P2
 		# can be cfvs or range
-		self.layers[0].ranges[ 0 , 0 , 0 , : , P1 , : ] = player_range.copy()
+		player_range = np.asarray(player_range)
+		self.layers[0].ranges[ 0 , 0 , 0 , : , P1 , : ] = player_range
+
 		if opponent_cfvs is None:
+			opponent_range = np.asarray(opponent_range)
 			self.layers[0].ranges[ 0 , 0 , 0 , : , P2 , : ] = opponent_range.copy()
 			self._compute(reconstruct_opponent_cfvs=False)
 		else: # opponent_range is None:

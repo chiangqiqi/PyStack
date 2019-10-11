@@ -3,6 +3,7 @@
 '''
 import os
 import numpy as np
+import cupy
 
 from TerminalEquity.evaluator import evaluator
 from Settings.arguments import arguments
@@ -21,6 +22,8 @@ class TerminalEquity():
 		else:
 			self._block_matrix = self._create_block_matrix()
 
+		self.equity_matrix_gpu = None
+		self.fold_matrix_gpu = None
 
 	def set_board(self, board):
 		''' Sets the board cards for the evaluator and creates internal data structures
@@ -57,7 +60,10 @@ class TerminalEquity():
 				the first player when no player folds. For nodes in the first
 				betting round, the weighted average of all such possible matrices
 		'''
-		return self.equity_matrix
+		if self.equity_matrix_gpu is None:
+			self.equity_matrix_gpu = cupy.asarray(self.equity_matrix)
+		return self.equity_matrix_gpu
+
 
 
 	def get_fold_matrix(self):
@@ -66,7 +72,9 @@ class TerminalEquity():
 				ranges `x` and `y`, `x'Ay` is the equity
 				for the player who doesn't fold
 		'''
-		return self.fold_matrix
+		if self.fold_matrix_gpu is None:
+			self.fold_matrix_gpu = cupy.asarray(self.fold_matrix)
+		return self.fold_matrix_gpu
 
 
 	def get_hand_strengths(self):

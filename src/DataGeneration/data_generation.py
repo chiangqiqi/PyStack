@@ -79,6 +79,7 @@ class DataGeneration():
 		# normalize cfvs dividing by pot size
 		root_values /= random_pot_size
 		# put calculated cfvs into targets
+		root_values = root_values.get()
 		for p in range(PC):
 			targets[ : , p*HC:(p+1)*HC ] = root_values[ : , p , : ]
 		# return inputs [b, I x P + 1] and targets [b, I x P]
@@ -162,6 +163,7 @@ class DataGeneration():
 			for b in range(num_different_boards_per_file):
 				t0 = time.time()
 				# create random board
+				# can set this to do an apple to apple profiling np.random.seed(42)
 				if self.street == 1: board = np.zeros([], dtype=arguments.int_dtype)
 				else: board = np.random.choice(card_count, size=num_board_cards, replace=False)
 				# init targets, inputs and solve it
